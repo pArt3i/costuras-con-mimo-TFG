@@ -9,9 +9,7 @@ from .serializers import *
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-# ==========================================
-# VISTAS PÚBLICAS (Catálogo, Categorías, Tejidos)
-# ==========================================
+
 class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
@@ -32,26 +30,21 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioSerializer
     permission_classes = [AllowAny] 
 
-    # NUEVA ACCIÓN: Devuelve los datos del usuario logueado
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
-# ==========================================
-# VISTAS PROTEGIDAS (Requieren Login/Token JWT)
-# ==========================================
+
 class EncargoViewSet(viewsets.ModelViewSet):
-    queryset = Encargo.objects.all() # <--- SOLUCIÓN AL ERROR AQUÍ
+    queryset = Encargo.objects.all()
     serializer_class = EncargoSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Filtro de seguridad: El usuario solo ve sus propios artículos en el carrito
         return Encargo.objects.filter(id_usuario=self.request.user)
     
     def perform_create(self, serializer):
-        # Firma el encargo con el usuario que está haciendo la petición
         serializer.save(id_usuario=self.request.user)
         
     @action(detail=False, methods=['post'])
@@ -101,12 +94,11 @@ class EncargoViewSet(viewsets.ModelViewSet):
 
 
 class PedidoViewSet(viewsets.ModelViewSet):
-    queryset = Pedido.objects.all() # <--- SOLUCIÓN AL ERROR AQUÍ
+    queryset = Pedido.objects.all()
     serializer_class = PedidoSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Si es admin ve todos los pedidos, si es cliente solo ve los suyos
         if self.request.user.is_staff:
             return Pedido.objects.all().order_by('-fecha_pedido')
         return Pedido.objects.filter(id_usuario=self.request.user).order_by('-fecha_pedido')

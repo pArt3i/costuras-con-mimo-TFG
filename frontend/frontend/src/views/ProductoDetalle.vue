@@ -10,7 +10,6 @@ const imagenPrincipal = ref('')
 const cargando = ref(true)
 const añadiendo = ref(false)
 
-// Función para resolver la ruta de la imagen (la misma que usamos en la tienda)
 const resolverRutaImagen = (ruta) => {
   if (!ruta) return 'https://via.placeholder.com/400'
   if (ruta.startsWith('http')) return ruta
@@ -33,18 +32,15 @@ const seleccionarImagen = (url) => {
   imagenPrincipal.value = resolverRutaImagen(url)
 }
 
-// --- FUNCIÓN ACTUALIZADA PARA LA CESTA MIXTA ---
 const añadirAlCarrito = async () => {
   añadiendo.value = true
   try {
-    // 1. Obtenemos el ID del usuario del localStorage (o usamos 1 por defecto para pruebas)
-    // Lo ideal es tener un sistema de perfil, pero para que funcione ahora:
     const userId = 1 
 
     const payload = {
       id_usuario: userId,
-      id_producto: producto.value.id, // 👈 ENVIAMOS EL ID DEL PRODUCTO (CATÁLOGO)
-      id_tejido: null,               // No es personalizado
+      id_producto: producto.value.id,
+      id_tejido: null,
       producto_type: producto.value.nombre,
       precio: producto.value.precio,
       bordado: '',
@@ -53,7 +49,6 @@ const añadirAlCarrito = async () => {
 
     await axios.post('http://127.0.0.1:8000/api/encargos/', payload)
 
-    // Emitimos el evento para actualizar el contador de la Navbar
     window.dispatchEvent(new CustomEvent('carrito-actualizado'))
 
     alert("¡Añadido a la cesta correctamente!")
@@ -122,15 +117,3 @@ const añadirAlCarrito = async () => {
 <div v-else-if="cargando" class="loading">Cargando producto...</div>
 </template>
 
-<style scoped>
-.producto-detalle { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px; }
-.main-img { width: 100%; height: 450px; object-fit: cover; border-radius: 15px; }
-.thumbnails { display: flex; gap: 10px; margin-top: 15px; }
-.thumb { width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid transparent; border-radius: 8px; }
-.thumb.activa { border-color: #606c38; }
-.precio { font-size: 2rem; color: #bc6c25; font-weight: bold; }
-.btn-carrito { background: #606c38; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
-.btn-carrito:disabled { background: #a3ad8d; }
-.in-stock { color: #2a9d8f; }
-.no-stock { color: #e76f51; }
-</style>

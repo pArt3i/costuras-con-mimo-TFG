@@ -40,7 +40,6 @@ class Encargo(models.Model):
     cantidad = models.IntegerField(default=1)
     fecha_enc = models.DateTimeField(auto_now_add=True)
 
-# --- LA TABLA DE PEDIDOS (CABECERA) ---
 class Pedido(models.Model):
     ESTADOS_PAGO = [
         ('PENDIENTE', 'Pendiente'),
@@ -53,20 +52,14 @@ class Pedido(models.Model):
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     fecha_pedido = models.DateTimeField(auto_now_add=True)
     total = models.FloatField(default=0.0)
-    direccion = models.CharField(max_length=255, blank=True, null=True) # Añadido por tu diagrama
+    direccion = models.CharField(max_length=255, blank=True, null=True)
     estado = models.CharField(max_length=20, choices=ESTADOS_PAGO, default='PENDIENTE')
 
     def __str__(self): return f"Pedido {self.id} - {self.id_usuario.username}"
 
-# --- LA TABLA DETALLE_PEDIDO (LÍNEAS) ---
 class DetallePedido(models.Model):
     id_pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='detalles')
-    
-    # Puede ser un producto estándar de la tienda...
     id_producto = models.ForeignKey(Producto, on_delete=models.SET_NULL, null=True, blank=True)
-    
-    # ... O puede ser un encargo personalizado
     id_encargo = models.ForeignKey(Encargo, on_delete=models.SET_NULL, null=True, blank=True)
-    
     cantidad = models.IntegerField(default=1)
     precio_unitario = models.FloatField()

@@ -7,7 +7,6 @@ const nuevoEmail = ref('')
 const nuevaPass = ref('')
 const mensaje = ref({ texto: '', tipo: '' })
 
-// Cargar datos al iniciar
 onMounted(async () => {
   const res = await axios.get('http://127.0.0.1:8000/api/usuarios/me/', {
     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -22,7 +21,6 @@ const apiUpdate = async (datos) => {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
     mensaje.value = { texto: "✅ Cambio realizado con éxito", tipo: 'exito' }
-    // Actualizamos la vista del email actual si cambió
     if(datos.email) usuarioActual.value.email = datos.email
   } catch (error) {
     const errorMsg = error.response?.data?.email?.[0] || error.response?.data?.password?.[0] || "Error al actualizar";
@@ -71,10 +69,3 @@ const cambiarPass = () => {
     </div>
 </div>
 </template>
-
-<style scoped>
-.perfil-container { max-width: 500px; margin-top: 40px; }
-.seccion-perfil { margin: 20px 0; display: flex; flex-direction: column; gap: 10px; }
-.input-estilo { padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
-</style>

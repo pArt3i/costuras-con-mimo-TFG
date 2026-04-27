@@ -71,9 +71,8 @@ const irAlPerfil = () => {
   router.push('/perfil')
 }
 
-// Cuenta los productos en estado CARRITO
 const actualizarContadorCarrito = async () => {
-  if (!token.value) return; // Si no hay usuario, no hay carrito que contar
+  if (!token.value) return;
   try {
     const response = await axios.get('http://127.0.0.1:8000/api/encargos/')
     const itemsEnCarrito = response.data.filter(encargo => encargo.estado === 'CARRITO')
@@ -92,21 +91,3 @@ onUnmounted(() => {
   window.removeEventListener('carrito-actualizado', actualizarContadorCarrito)
 })
 </script>
-
-<style>
-/* Estilos globales y de la Navbar */
-body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fdfaf0; }
-.navbar { background: #ccd5ae; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.nav-links { display: flex; gap: 20px; }
-.nav-link { text-decoration: none; color: #333; font-weight: bold; transition: color 0.3s; font-size: 1.1rem; }
-.nav-link:hover { color: #606c38; }
-.nav-auth { display: flex; gap: 20px; align-items: center; }
-.cart-icon { text-decoration: none; font-size: 1.5rem; position: relative; }
-.badge { background: #d9534f; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.75rem; position: absolute; top: -5px; right: -10px; font-weight: bold; }
-.btn-login { background: #606c38; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background 0.2s; }
-.btn-login:hover { background: #4a532a; }
-.btn-perfil { background: #bc6c25; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background 0.2s; }
-.btn-perfil:hover { background: #96561d; }
-.btn-logout { background: transparent; color: #d9534f; border: 1px solid #d9534f; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-.btn-logout:hover { background: #d9534f; color: white; }
-</style>

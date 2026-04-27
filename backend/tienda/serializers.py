@@ -4,9 +4,6 @@ from .models import (
     Tejido, Encargo, Pedido, DetallePedido
 )
 
-# ==========================================
-# 1. SERIALIZADORES BÁSICOS
-# ==========================================
 
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,9 +25,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = ['id', 'username', 'email', 'is_superuser']
 
-# ==========================================
-# 2. SERIALIZADORES DE CATÁLOGO Y CESTA
-# ==========================================
 
 class ProductoSerializer(serializers.ModelSerializer):
     imagenes_extra = ProductoImagenSerializer(many=True, read_only=True)
@@ -49,9 +43,6 @@ class EncargoSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id_usuario']
 
-# ==========================================
-# 3. SERIALIZADORES DE PEDIDOS (NUEVOS)
-# ==========================================
 
 class DetallePedidoSerializer(serializers.ModelSerializer):
     nombre_item = serializers.SerializerMethodField()
