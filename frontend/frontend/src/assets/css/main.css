@@ -1,0 +1,63 @@
+/* VARIABLES GLOBALES */
+:root {
+    --primario: #606c38;
+    --secundario: #ccd5ae;
+    --fondo: #fefae0;
+    --detalle: #d4a373;
+    --blanco: #ffffff;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--fondo);
+}
+
+/* CONTENEDORES */
+.container { max-width: 1100px; margin: auto; padding: 40px; }
+
+/* FICHA DE PRODUCTO (Detalle) */
+.producto-detalle {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 50px; 
+}
+.main-img { 
+    width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+}
+.thumbnails { 
+    display: flex; gap: 10px; margin-top: 15px; 
+}
+.thumb { 
+    width: 70px; height: 70px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid transparent; 
+}
+.thumb:hover { 
+    border-color: var(--detalle); 
+}
+
+.categoria-tag { 
+    background: var(--secundario); color: var(--primario); padding: 4px 12px; border-radius: 20px; font-size: 14px; 
+}
+.precio { 
+    font-size: 32px; font-weight: bold; color: var(--detalle); margin: 15px 0; 
+}
+.in-stock { color: #2a9d8f; }
+.no-stock { color: #e76f51; }
+
+/* FORMULARIO DE ENCARGOS */
+.encargo-container { 
+    max-width: 500px; margin: auto; padding: 30px; background: var(--blanco); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+}
+.form-estilo { 
+    display: flex; flex-direction: column; gap: 15px; margin-top: 20px; 
+}
+.campo { 
+    display: flex; flex-direction: column; gap: 5px; 
+}
+input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
+
+/* BOTONES */
+.btn-enviar, .btn-carrito { 
+    background: var(--secundario); color: #333; border: none; padding: 15px; 
+    border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; 
+}
+.btn-enviar:hover, .btn-carrito:hover { background: var(--detalle); color: white; }
+.btn-volver { display: block; margin-top: 20px; text-align: center; color: #666; text-decoration: none; }
