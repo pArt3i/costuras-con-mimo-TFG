@@ -18,11 +18,6 @@ class Producto(models.Model):
     img = models.CharField(max_length=500)
     def __str__(self): return self.nombre
 
-class ProductoImagen(models.Model):
-    id_prod = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='imagenes_extra')
-    img_url = models.CharField(max_length=500)
-    orden = models.IntegerField(default=0)
-
 class Tejido(models.Model):
     nombre_tej = models.CharField(max_length=100)
     img = models.CharField(max_length=500)
