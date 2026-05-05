@@ -1,9 +1,8 @@
 from rest_framework import serializers
 from .models import (
-    Usuario, Categoria, Producto, ProductoImagen, 
+    Usuario, Categoria, Producto, 
     Tejido, Encargo, Pedido, DetallePedido
 )
-
 
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,24 +14,25 @@ class TejidoSerializer(serializers.ModelSerializer):
         model = Tejido
         fields = '__all__'
 
-class ProductoImagenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductoImagen
-        fields = ['img_url', 'orden']
-
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'username', 'email', 'is_superuser']
+        fields = ['id', 'username', 'email', 'is_superuser','password','direccion']
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'email': {'required': True}
+        }
 
+    def create(self, validated_data):
+        user = Usuario.objects.create_user(**validated_data)
+        return user
 
 class ProductoSerializer(serializers.ModelSerializer):
-    imagenes_extra = ProductoImagenSerializer(many=True, read_only=True)
     categoria_nombre = serializers.ReadOnlyField(source='id_categoria.nombre_cat')
     
     class Meta:
         model = Producto
-        fields = ['id', 'id_categoria', 'categoria_nombre', 'nombre', 'precio', 'stock', 'img', 'imagenes_extra']
+        fields = ['id', 'id_categoria', 'categoria_nombre', 'nombre', 'precio', 'stock', 'img']
 
 class EncargoSerializer(serializers.ModelSerializer):
     producto_img = serializers.ReadOnlyField(source='id_producto.img')
@@ -42,7 +42,6 @@ class EncargoSerializer(serializers.ModelSerializer):
         model = Encargo
         fields = '__all__'
         read_only_fields = ['id_usuario']
-
 
 class DetallePedidoSerializer(serializers.ModelSerializer):
     nombre_item = serializers.SerializerMethodField()

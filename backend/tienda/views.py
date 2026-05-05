@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import *
 from .serializers import *
+from django.core.mail import send_mail
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
 
 class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all()
@@ -34,7 +34,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
-
 
 class EncargoViewSet(viewsets.ModelViewSet):
     queryset = Encargo.objects.all()
@@ -92,13 +91,66 @@ class EncargoViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 
-
 class PedidoViewSet(viewsets.ModelViewSet):
     queryset = Pedido.objects.all()
     serializer_class = PedidoSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        # Si es admin ve todos los pedidos, si es cliente solo ve los suyos
         if self.request.user.is_staff:
             return Pedido.objects.all().order_by('-fecha_pedido')
         return Pedido.objects.filter(id_usuario=self.request.user).order_by('-fecha_pedido')
+
+    # ---> NUEVA LÓGICA DE CORREOS <---
+    
+    def perform_update(self, serializer):
+        # 1. Miramos cómo estaba el pedido ANTES de que el admin lo cambie
+        estado_anterior = serializer.instance.estado
+        
+        # 2. Guardamos los cambios en la base de datos (se aplica el nuevo estado)
+        pedido = serializer.save()
+
+        # 3. Comparamos. Si el estado ha cambiado, enviamos el email
+        if estado_anterior != pedido.estado:
+            self.enviar_correo_actualizacion(pedido)
+
+    def enviar_correo_actualizacion(self, pedido):
+        # Diccionario para poner asuntos bonitos según el estado
+        asuntos = {
+            'PAGADO': 'Tu pedido ha sido confirmado 💸',
+            'EN_PREPARACION': '¡Estamos preparando tu pedido! 🧵',
+            'ENVIADO': '¡Tu pedido va en camino! 🚚',
+            'ENTREGADO': 'Pedido entregado. ¡Disfrútalo! 🎁',
+            'CANCELADO': 'Tu pedido ha sido cancelado ❌'
+        }
+
+        # Obtenemos el asunto (si no está en el diccionario, ponemos uno por defecto)
+        asunto = asuntos.get(pedido.estado, f"Actualización de tu pedido #{pedido.id}")
+        
+        # Construimos el cuerpo del mensaje
+        mensaje = f"""
+        ¡Hola {pedido.id_usuario.username}!
+        
+        Te escribimos desde Costuras con Mimo para avisarte de que tu pedido #{pedido.id} ha cambiado de estado.
+        
+        Nuevo estado: {pedido.estado.replace('_', ' ')}
+        Total del pedido: {pedido.total}€
+        
+        Puedes revisar los detalles de tu compra en tu perfil en cualquier momento:
+        http://localhost:5173/perfil
+        
+        ¡Muchas gracias por confiar en nuestro taller artesanal!
+        """
+        
+        # Enviamos el correo
+        try:
+            send_mail(
+                subject=asunto,
+                message=mensaje,
+                from_email='hello@demomailtrap.co',
+                recipient_list=[pedido.id_usuario.email], 
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"Error al enviar el correo: {e}")

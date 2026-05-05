@@ -10,7 +10,6 @@ class CustomUserAdmin(UserAdmin):
 admin.site.register(Usuario, CustomUserAdmin)
 admin.site.register(Categoria)
 admin.site.register(Tejido)
-admin.site.register(ProductoImagen)
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):

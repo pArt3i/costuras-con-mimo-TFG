@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'tienda',
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +150,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'fotos')
 load_dotenv()
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+
+
+# settings.py
+ANYMAIL = {
+    "MAILTRAP_API_TOKEN": os.getenv("MAILTRAP_API_TOKEN"),
+}
+EMAIL_BACKEND = "anymail.backends.mailtrap.EmailBackend"
+DEFAULT_FROM_EMAIL = "hello@demomailtrap.co"

@@ -43,6 +43,19 @@ const router = createRouter({
       name: 'PagoExito',
       component: () => import('../views/PagoExito.vue')
     },
+    {
+      path: '/:pathMatch(.*)*', 
+      name: 'NotFound',
+      component: () => import('../views/Errors/NotFoundView.vue'),
+      // Agregamos esto:
+      meta: { ocultarNav: true }
+    },
+    {
+      path: '/403',
+      name: 'Forbidden',
+      component: () => import('../views/Errors/ForbiddenView.vue'),
+      meta: { ocultarNav: true }
+    },
   ],
 })
 
@@ -54,8 +67,7 @@ router.beforeEach((to, from) => {
   }
 
   if (to.meta.requiereAdmin && !esAdmin) {
-    alert('⛔ Acceso denegado. Área reservada para administradores.');
-    return '/';
+    return '/403';
   }
 
   return true;

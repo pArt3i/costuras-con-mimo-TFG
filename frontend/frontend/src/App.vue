@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <nav v-if="$route.path !== '/admin'" class="navbar">
+    <nav v-if="!$route.meta.ocultarNav" class="navbar">
       <div class="nav-links">
         <router-link to="/" class="nav-link">Tienda</router-link>
         <router-link to="/encargo-personalizado" class="nav-link">Encargos</router-link>
@@ -27,7 +27,7 @@
     <router-view />
 
     <LoginModal 
-      v-if="$route.path !== '/admin'"
+      v-if="!$route.meta.ocultarNav"
       :mostrar="mostrarModal" 
       @cerrar="mostrarModal = false" 
       @loginExitoso="actualizarEstado" 
@@ -72,7 +72,7 @@ const irAlPerfil = () => {
 }
 
 const actualizarContadorCarrito = async () => {
-  if (!token.value) return;
+  if (!localStorage.getItem('token')) return;
   try {
     const response = await axios.get('http://127.0.0.1:8000/api/encargos/')
     const itemsEnCarrito = response.data.filter(encargo => encargo.estado === 'CARRITO')

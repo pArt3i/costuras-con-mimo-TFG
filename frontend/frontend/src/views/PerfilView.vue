@@ -21,29 +21,44 @@ const pedidoSeleccionado = ref(null)
 
 const cargarDatos = async () => {
   try {
-    const nombreGuardado = localStorage.getItem('username') || 'Usuario'
-    usuario.value = {
-      username: nombreGuardado,
-      email: `${nombreGuardado.toLowerCase()}@costurasconmimo.es`,
-      direccion: 'Av. de los Artesanos 45, 2ºB, Madrid'
+    const nombreGuardado = localStorage.getItem('username')
+    const token = localStorage.getItem('token')
+
+    // 1. OBTENER LOS DATOS REALES DEL USUARIO DESDE EL BACKEND
+    if (nombreGuardado && token) {
+      const userRes = await axios.get('http://127.0.0.1:8000/api/usuarios/', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      
+      // Buscamos al usuario conectado en la lista
+      const miUsuario = userRes.data.find(u => u.username === nombreGuardado)
+      
+      if (miUsuario) {
+        usuario.value = {
+          username: miUsuario.username,
+          email: miUsuario.email || 'No especificado',
+          direccion: miUsuario.direccion || 'No especificada' // Carga la de la base de datos
+        }
+      }
     }
 
+    // 2. OBTENER LOS PEDIDOS
     const response = await axios.get('http://127.0.0.1:8000/api/pedidos/')
     
-    if (localStorage.getItem('username')) {
+    if (nombreGuardado) {
       pedidos.value = response.data.filter(p => 
         p.usuario_nombre && p.usuario_nombre.toLowerCase() === nombreGuardado.toLowerCase()
       )
       if (pedidos.value.length === 0) {
         pedidos.value = response.data.filter(p => p.id_usuario === 1)
       }
-      
     } else {
       pedidos.value = response.data.filter(p => p.id_usuario === 1)
     }
 
   } catch (error) {
     console.error("Error cargando perfil", error)
+    usuario.value.username = localStorage.getItem('username') || 'Usuario'
   } finally {
     cargando.value = false
   }
