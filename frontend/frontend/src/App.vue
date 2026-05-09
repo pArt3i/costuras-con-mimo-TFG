@@ -1,37 +1,69 @@
 <template>
   <div id="app">
-    <nav v-if="!$route.meta.ocultarNav" class="navbar">
-      <div class="nav-links">
-        <router-link to="/" class="nav-link">Tienda</router-link>
-        <router-link to="/encargo-personalizado" class="nav-link">Encargos</router-link>
+    
+    <!-- NUEVO HEADER DE DOS FRANJAS -->
+    <header v-if="!$route.meta.ocultarNav" class="header-principal">
+      
+      <!-- Franja Superior (Logo, Admin, Usuario y Carrito) -->
+      <div class="header-top">
         
-        <router-link v-if="isAdmin" to="/admin" class="nav-link" style="color: #bc6c25;">
-          ⚙️ Panel Admin
-        </router-link>
-      </div>
+        <!-- Izquierda: Link del Admin (para equilibrar visualmente) -->
+        <div class="header-izq">
+          <router-link v-if="isAdmin" to="/admin" class="enlace-admin">
+            ⚙️ Panel Admin
+          </router-link>
+        </div>
 
-      <div class="nav-auth">
-        <router-link to="/carrito" class="cart-icon">
-          🛒 <span v-if="cartCount > 0" class="badge">{{ cartCount }}</span>
-        </router-link>
-        
-        <button v-if="!token" @click="mostrarModal = true" class="btn-login">Acceder</button>
-        
-        <div v-else style="display: flex; gap: 10px; align-items: center;">
-          <button @click="irAlPerfil" class="btn-perfil">👤 {{ nombreUsuario }}</button>
-          <button @click="cerrarSesion" class="btn-logout">Salir</button>
+        <!-- Centro: Logo y Título -->
+        <div class="header-centro">
+          <router-link to="/" class="logo-wrapper">
+            <!-- Icono de aguja e hilo dibujado con SVG -->
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#606c38" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.5 19.5l15-15M13.5 4.5l6 6M4 20c-2 0-3-1-3-3 0-2 2-3 4-2 2 1 3 3 2 4s-3 1-3 1z" />
+            </svg>
+            <span class="logo-texto">Costuras con Mimo</span>
+          </router-link>
+        </div>
+
+        <!-- Derecha: Login y Carrito -->
+        <div class="header-der">
+          <div v-if="!token" class="auth-box">
+            <button @click="mostrarModal = true" class="btn-login-header">👤 Iniciar sesión</button>
+          </div>
+          <div v-else class="auth-box">
+            <span class="user-greeting" @click="irAlPerfil" title="Ir a mi perfil">
+              👤 Hola, {{ nombreUsuario }}
+            </span>
+            <button @click="cerrarSesion" class="btn-logout-mini">Salir</button>
+          </div>
+
+          <router-link to="/carrito" class="btn-carrito-header">
+            🛒 <span class="cart-count">{{ cartCount }} {{ cartCount === 1 ? 'item' : 'items' }}</span>
+          </router-link>
         </div>
       </div>
-    </nav>
 
-    <router-view />
+      <!-- Franja Inferior (Menú de Navegación Verde) -->
+      <nav class="header-bottom">
+        <router-link to="/" class="nav-bottom-link" exact-active-class="activo">INICIO</router-link>
+        <router-link to="/encargo-personalizado" class="nav-bottom-link" exact-active-class="activo">PIDE TU ENCARGO</router-link>
+        <router-link to="/contacto" class="nav-bottom-link" exact-active-class="activo">CONTACTO</router-link>
+      </nav>
+      
+    </header>
 
+    <!-- Contenido de la página -->
+    <router-view class="contenido-principal" />
+
+    <!-- Modales y Footer -->
     <LoginModal 
       v-if="!$route.meta.ocultarNav"
       :mostrar="mostrarModal" 
       @cerrar="mostrarModal = false" 
       @loginExitoso="actualizarEstado" 
     />
+
+    <FooterTienda v-if="!$route.meta.ocultarNav" />
   </div>
 </template>
 
@@ -40,6 +72,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import LoginModal from './components/LoginModal.vue'
+import FooterTienda from './components/FooterTienda.vue'
 
 const router = useRouter()
 const token = ref(localStorage.getItem('token'))

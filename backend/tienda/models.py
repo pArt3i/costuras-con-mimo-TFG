@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 
 class Usuario(AbstractUser):
@@ -16,6 +17,14 @@ class Producto(models.Model):
     precio = models.FloatField()
     stock = models.IntegerField()
     img = models.CharField(max_length=500)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='productos_creados'
+    )
+    fecha_creacion = models.DateTimeField(auto_now_add=True, null=True)
     def __str__(self): return self.nombre
 
 class Tejido(models.Model):

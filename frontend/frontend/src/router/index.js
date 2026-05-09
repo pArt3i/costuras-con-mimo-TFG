@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import TiendaView from '../views/Tienda.vue' 
+import TiendaView from '../views/Tienda.vue'
+import Contacto from '../views/Contacto.vue' 
 
 
 const router = createRouter({
@@ -36,7 +37,7 @@ const router = createRouter({
       path: '/admin',
       name: 'admin',
       component: () => import('../views/AdminView.vue'),
-      meta: { requiereAuth: true, requiereAdmin: true } 
+      meta: { requiereAuth: true, requiereAdmin: true, ocultarNav: true } 
     },
     {
       path: '/pago-exito',
@@ -55,6 +56,11 @@ const router = createRouter({
       name: 'Forbidden',
       component: () => import('../views/Errors/ForbiddenView.vue'),
       meta: { ocultarNav: true }
+    },
+    {
+      path: '/contacto',
+      name: 'Contacto',
+      component: Contacto
     },
   ],
 })

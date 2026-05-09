@@ -68,7 +68,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'costuras_db',
         'USER': 'postgres',
-        'PASSWORD': 'TU_PASSWORD', # Introduce tu clave de Postgres
+        'PASSWORD': 'pArt3i', # Introduce tu clave de Postgres
         'HOST': 'localhost',
         'PORT': '5432',
     }

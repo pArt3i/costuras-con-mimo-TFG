@@ -6,12 +6,14 @@ const productos = ref([])
 const pedidos = ref([])
 const tejidos = ref([])
 const categorias = ref([])
+const administradores = ref([]) // <-- Lista de superusuarios
 const cargando = ref(true)
 
 // Control de ventanas modales
 const productoEnEdicion = ref(null)
 const tejidoEnEdicion = ref(null)
 const pedidoSeleccionado = ref(null)
+const categoriaEnEdicion = ref(null) 
 
 const ordenReciente = ref(true)
 
@@ -29,17 +31,22 @@ const getAuthHeaders = () => {
 
 const cargarDatos = async () => {
   try {
-    const [resP, resO, resT, resC] = await Promise.all([
+    const [resP, resO, resT, resC, resU] = await Promise.all([
       axios.get('http://127.0.0.1:8000/api/productos/', getAuthHeaders()),
       axios.get('http://127.0.0.1:8000/api/pedidos/', getAuthHeaders()),
       axios.get('http://127.0.0.1:8000/api/tejidos/', getAuthHeaders()),
-      axios.get('http://127.0.0.1:8000/api/categorias/', getAuthHeaders())
+      axios.get('http://127.0.0.1:8000/api/categorias/', getAuthHeaders()),
+      axios.get('http://127.0.0.1:8000/api/usuarios/', getAuthHeaders()) // Pedimos usuarios
     ])
     
     productos.value = Array.isArray(resP.data) ? resP.data : (resP.data.results || [])
     pedidos.value = Array.isArray(resO.data) ? resO.data : (resO.data.results || [])
     tejidos.value = Array.isArray(resT.data) ? resT.data : (resT.data.results || [])
     categorias.value = Array.isArray(resC.data) ? resC.data : (resC.data.results || [])
+    
+    // Extraemos solo a los usuarios que son administradores (artistas)
+    const listaUsuarios = Array.isArray(resU.data) ? resU.data : (resU.data.results || [])
+    administradores.value = listaUsuarios.filter(u => u.is_superuser)
 
   } catch (e) {
     console.error("Error cargando el dashboard:", e)
@@ -47,6 +54,7 @@ const cargarDatos = async () => {
     pedidos.value = []
     tejidos.value = []
     categorias.value = []
+    administradores.value = []
   } finally {
     cargando.value = false
   }
@@ -57,11 +65,8 @@ const productosProcesados = computed(() => {
   if (!Array.isArray(productos.value)) return []
   
   return productos.value.filter(p => {
-    // Filtro por Categoría
     const matchCat = filtroCategoriaProducto.value === '' || p.id_categoria == filtroCategoriaProducto.value
-    // Filtro por Artista (Preparado para cuando actualices la base de datos)
     const matchArtista = filtroArtista.value === '' || (p.artista && p.artista.toLowerCase().includes(filtroArtista.value.toLowerCase()))
-    
     return matchCat && matchArtista
   })
 })
@@ -71,15 +76,11 @@ const pedidosProcesados = computed(() => {
   if (!Array.isArray(pedidos.value)) return []
   
   let lista = pedidos.value.filter(ped => {
-    // Filtro por Cliente
     const matchUsuario = filtroUsuario.value === '' || (ped.usuario_nombre && ped.usuario_nombre.toLowerCase().includes(filtroUsuario.value.toLowerCase()))
-    // Filtro por ID de Pedido
     const matchId = filtroPedidoId.value === '' || ped.id.toString() === filtroPedidoId.value.toString()
-    
     return matchUsuario && matchId
   })
 
-  // Ordenar después de filtrar
   lista.sort((a, b) => {
     const da = new Date(a.fecha_pedido), db = new Date(b.fecha_pedido)
     return ordenReciente.value ? db - da : da - db
@@ -111,10 +112,32 @@ const cambiarEstadoPedido = async (id, nuevoEstado) => {
   }
 }
 
+// --- LÓGICA DE CATEGORÍAS ---
+const nuevaCategoria = () => {
+  categoriaEnEdicion.value = { nombre_cat: '' }
+}
+
+const guardarCambiosCategoria = async () => {
+  try {
+    if (categoriaEnEdicion.value.id) {
+      await axios.patch(`http://127.0.0.1:8000/api/categorias/${categoriaEnEdicion.value.id}/`, categoriaEnEdicion.value, getAuthHeaders())
+      alert("Categoría modificada correctamente")
+    } else {
+      await axios.post(`http://127.0.0.1:8000/api/categorias/`, categoriaEnEdicion.value, getAuthHeaders())
+      alert("Categoría creada correctamente")
+    }
+    categoriaEnEdicion.value = null
+    cargarDatos()
+  } catch (e) { 
+    console.error(e)
+    alert("Error al guardar la categoría.") 
+  }
+}
+
 // --- LÓGICA DE PRODUCTOS Y TEJIDOS ---
 const nuevoProducto = () => {
-  // Cuando actualices la BD, añade 'artista: ""' aquí también si es necesario editarlo manual
-  productoEnEdicion.value = { nombre: '', precio: 0, stock: 0, img: '', id_categoria: '' }
+  // Nota: Inicializamos 'usuario' en vez de 'artista' porque Django espera el ID del usuario
+  productoEnEdicion.value = { nombre: '', precio: 0, stock: 0, img: '', id_categoria: '', usuario: '' }
 }
 
 const guardarCambiosProducto = async () => {
@@ -129,8 +152,9 @@ const guardarCambiosProducto = async () => {
     productoEnEdicion.value = null
     cargarDatos()
   } catch (e) { 
-    console.error(e)
-    alert("Error al guardar el producto. Revisa los datos.") 
+    console.error("Error completo:", e.response?.data || e)
+    const mensajeDjango = e.response?.data ? JSON.stringify(e.response.data) : "Error desconocido";
+    alert(`Django ha rechazado el producto. Motivo:\n\n${mensajeDjango}`)
   }
 }
 
@@ -176,7 +200,7 @@ onMounted(cargarDatos)
         <router-link to="/" class="btn-exit">Volver a la Tienda</router-link>
       </header>
 
-      <div v-if="cargando" class="loader">Conectando con el taller...</div>
+      <div v-if="cargando" class="loader" style="text-align: center; padding: 50px;">Conectando con el taller...</div>
 
       <main v-else class="admin-content dos-columnas">
         
@@ -190,7 +214,10 @@ onMounted(cargarDatos)
                   <h2>📦 Inventario de Productos</h2>
                   <span class="hint">Haz clic para editar, o crea uno nuevo</span>
                 </div>
-                <button @click="nuevoProducto" class="btn-add">+ Añadir Producto</button>
+                <div class="botones-accion">
+                  <button @click="nuevaCategoria" class="btn-add btn-secondary">+ Añadir Categoría</button>
+                  <button @click="nuevoProducto" class="btn-add">+ Añadir Producto</button>
+                </div>
               </div>
               
               <!-- ZONA DE FILTROS PRODUCTOS -->
@@ -199,7 +226,14 @@ onMounted(cargarDatos)
                   <option value="">Todas las categorías</option>
                   <option v-for="cat in categorias" :key="cat.id" :value="cat.id">{{ cat.nombre_cat }}</option>
                 </select>
-                <input type="text" v-model="filtroArtista" placeholder="Filtrar por artista..." class="input-filtro">
+                
+                <!-- 👇 DESPLEGABLE DE ARTISTA EN LUGAR DE TEXTO 👇 -->
+                <select v-model="filtroArtista" class="input-filtro">
+                  <option value="">Todos los artistas</option>
+                  <option v-for="admin in administradores" :key="admin.id" :value="admin.username">
+                    {{ admin.username }}
+                  </option>
+                </select>
               </div>
             </div>
 
@@ -301,21 +335,41 @@ onMounted(cargarDatos)
         </div>
       </footer>
 
-      <!-- (Modales de Producto, Tejido y Pedido se mantienen intactos en la plantilla base) -->
-      <!-- ... -->
+      <!-- MODAL CATEGORIA -->
+      <div v-if="categoriaEnEdicion" class="modal-overlay" @click.self="categoriaEnEdicion = null">
+        <div class="modal-card">
+          <h3>{{ categoriaEnEdicion.id ? 'Modificar Categoría' : 'Añadir Nueva Categoría' }}</h3>
+          <div class="input-group">
+            <label>Nombre de la Categoría:</label>
+            <input v-model="categoriaEnEdicion.nombre_cat" type="text" placeholder="Ej. Accesorios Bebé" required>
+          </div>
+          <div class="modal-actions">
+            <button @click="guardarCambiosCategoria" class="btn-save">{{ categoriaEnEdicion.id ? 'Guardar Cambios' : 'Añadir Categoría' }}</button>
+            <button @click="categoriaEnEdicion = null" class="btn-cancel">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL PRODUCTO -->
       <div v-if="productoEnEdicion" class="modal-overlay" @click.self="productoEnEdicion = null">
-        <!-- Contenido Modal Producto -->
         <div class="modal-card">
           <h3>{{ productoEnEdicion.id ? 'Modificar Producto' : 'Crear Nuevo Producto' }}</h3>
           <div class="input-group">
             <label>Nombre del Producto:</label>
-            <input v-model="productoEnEdicion.nombre" type="text" placeholder="Ej. Mochila Guardería">
+            <input v-model="productoEnEdicion.nombre" type="text" placeholder="Ej. Mochila Guardería" required>
           </div>
-          <!-- Nuevo input de Artista (Opcional por ahora) -->
+          
+          <!-- DESPLEGABLE DE ARTISTA OBLIGATORIO -->
           <div class="input-group">
-            <label>Artista (Opcional):</label>
-            <input v-model="productoEnEdicion.artista" type="text" placeholder="Nombre del artesano">
+            <label>Artista (Obligatorio):</label>
+            <select v-model="productoEnEdicion.usuario" required>
+              <option value="" disabled selected>Selecciona un artesano...</option>
+              <option v-for="admin in administradores" :key="admin.id" :value="admin.id">
+                {{ admin.username }}
+              </option>
+            </select>
           </div>
+
           <div class="input-group">
             <label>Categoría:</label>
             <select v-model="productoEnEdicion.id_categoria">
@@ -326,11 +380,11 @@ onMounted(cargarDatos)
           <div class="row">
             <div class="input-group">
               <label>Precio (€):</label>
-              <input type="number" step="0.01" v-model="productoEnEdicion.precio">
+              <input type="number" step="0.01" v-model="productoEnEdicion.precio" required>
             </div>
             <div class="input-group">
               <label>Unidades en Stock:</label>
-              <input type="number" v-model="productoEnEdicion.stock">
+              <input type="number" v-model="productoEnEdicion.stock" required>
             </div>
           </div>
           <div class="input-group">
@@ -338,7 +392,13 @@ onMounted(cargarDatos)
             <input v-model="productoEnEdicion.img" type="text" placeholder="ejemplo.png o URL completa">
           </div>
           <div class="modal-actions">
-            <button @click="guardarCambiosProducto" class="btn-save">{{ productoEnEdicion.id ? 'Guardar Cambios' : 'Crear Producto' }}</button>
+            <button 
+              @click="guardarCambiosProducto" 
+              class="btn-save" 
+              :disabled="!productoEnEdicion.usuario || !productoEnEdicion.nombre"
+            >
+              {{ productoEnEdicion.id ? 'Guardar Cambios' : 'Crear Producto' }}
+            </button>
             <button @click="productoEnEdicion = null" class="btn-cancel">Cancelar</button>
           </div>
         </div>
@@ -351,7 +411,7 @@ onMounted(cargarDatos)
           
           <div class="input-group">
             <label>Nombre de la Tela/Estampado:</label>
-            <input v-model="tejidoEnEdicion.nombre_tej" type="text" placeholder="Ej. Algodón Estrellas">
+            <input v-model="tejidoEnEdicion.nombre_tej" type="text" placeholder="Ej. Algodón Estrellas" required>
           </div>
 
           <div class="input-group">
@@ -407,159 +467,3 @@ onMounted(cargarDatos)
     </div>
   </div>
 </template>
-
-<style scoped>
-/* =========================================================
-   ESTILOS PARA FONDO, PANELES Y SCROLL
-   ========================================================= */
-
-/* Creamos un div extra para asegurar que el fondo se extienda en toda la vista */
-.admin-layout-fondo {
-  background-color: #e9edc9; /* Color de fondo general claro */
-  min-height: 100vh;
-  padding: 10px 0; /* Un poco de respiro si lo necesitas */
-}
-
-.admin-layout {
-  /* Mantenemos tu layout pero nos aseguramos de que no choque con el fondo */
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-/* Forzamos que cada panel sea blanco puro con una sombra suave para resaltar */
-.panel {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
-  padding: 20px;
-}
-
-.dos-columnas {
-  display: flex;
-  gap: 30px;
-  padding: 0 20px; /* Separación horizontal del borde de la pantalla */
-}
-
-.columna-izquierda {
-  flex: 2; 
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  height: calc(100vh - 220px); 
-}
-
-.columna-derecha {
-  flex: 1; 
-  height: calc(100vh - 220px); 
-}
-
-.panel-catalog {
-  flex: 1; 
-  display: flex;
-  flex-direction: column;
-}
-
-.panel-completo {
-  height: 100%; 
-  display: flex;
-  flex-direction: column;
-}
-
-.panel-header.flex {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 10px; 
-}
-
-/* Modificaciones para integrar los filtros */
-.panel-header.flex-columna {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #f4f5f0;
-  margin-bottom: 10px;
-}
-
-.cabecera-principal.flex {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.filtros-container {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-}
-
-.input-filtro {
-  padding: 8px 12px;
-  border: 1px solid #ccd5ae;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  outline: none;
-  flex: 1;
-  background-color: #fefae0;
-  color: #283618;
-}
-
-.input-filtro:focus {
-  border-color: #606c38;
-}
-
-.input-corto {
-  flex: 0.4; /* Hace que el campo del ID de pedido sea más pequeño que el del nombre */
-}
-
-.scrollable-list {
-  flex: 1; 
-  overflow-y: auto;
-  padding-right: 10px;
-  min-height: 0; 
-}
-
-.scrollable-list::-webkit-scrollbar {
-  width: 6px;
-}
-.scrollable-list::-webkit-scrollbar-thumb {
-  background: #ccd5ae;
-  border-radius: 4px;
-}
-.scrollable-list::-webkit-scrollbar-track {
-  background: transparent; 
-}
-
-.btn-add {
-  background-color: #bc6c25;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s;
-}
-
-.btn-add:hover {
-  background-color: #a05a1d;
-}
-
-@media (max-width: 900px) {
-  .dos-columnas {
-    flex-direction: column;
-  }
-  .columna-izquierda, .columna-derecha {
-    width: 100%;
-    height: auto; 
-  }
-  .panel-completo, .panel-catalog {
-    height: auto;
-  }
-  .scrollable-list {
-    max-height: 45vh; 
-  }
-}
-</style>

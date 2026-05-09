@@ -29,10 +29,11 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class ProductoSerializer(serializers.ModelSerializer):
     categoria_nombre = serializers.ReadOnlyField(source='id_categoria.nombre_cat')
+    artista = serializers.CharField(source='usuario.username', read_only=True)
     
     class Meta:
         model = Producto
-        fields = ['id', 'id_categoria', 'categoria_nombre', 'nombre', 'precio', 'stock', 'img']
+        fields = ['id', 'id_categoria', 'categoria_nombre', 'nombre', 'precio', 'stock', 'img', 'artista', 'usuario', 'fecha_creacion']
 
 class EncargoSerializer(serializers.ModelSerializer):
     producto_img = serializers.ReadOnlyField(source='id_producto.img')
