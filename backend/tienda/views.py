@@ -105,18 +105,12 @@ class PedidoViewSet(viewsets.ModelViewSet):
     # ---> NUEVA LÓGICA DE CORREOS <---
     
     def perform_update(self, serializer):
-        # 1. Miramos cómo estaba el pedido ANTES de que el admin lo cambie
         estado_anterior = serializer.instance.estado
-        
-        # 2. Guardamos los cambios en la base de datos (se aplica el nuevo estado)
         pedido = serializer.save()
-
-        # 3. Comparamos. Si el estado ha cambiado, enviamos el email
         if estado_anterior != pedido.estado:
             self.enviar_correo_actualizacion(pedido)
 
     def enviar_correo_actualizacion(self, pedido):
-        # Diccionario para poner asuntos bonitos según el estado
         asuntos = {
             'PAGADO': 'Tu pedido ha sido confirmado 💸',
             'EN_PREPARACION': '¡Estamos preparando tu pedido! 🧵',
@@ -124,11 +118,8 @@ class PedidoViewSet(viewsets.ModelViewSet):
             'ENTREGADO': 'Pedido entregado. ¡Disfrútalo! 🎁',
             'CANCELADO': 'Tu pedido ha sido cancelado ❌'
         }
-
-        # Obtenemos el asunto (si no está en el diccionario, ponemos uno por defecto)
         asunto = asuntos.get(pedido.estado, f"Actualización de tu pedido #{pedido.id}")
-        
-        # Construimos el cuerpo del mensaje
+
         mensaje = f"""
         ¡Hola {pedido.id_usuario.username}!
         
@@ -142,8 +133,6 @@ class PedidoViewSet(viewsets.ModelViewSet):
         
         ¡Muchas gracias por confiar en nuestro taller artesanal!
         """
-        
-        # Enviamos el correo
         try:
             send_mail(
                 subject=asunto,

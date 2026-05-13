@@ -48,9 +48,7 @@ const añadirAlCarrito = async () => {
     }
 
     await axios.post('http://127.0.0.1:8000/api/encargos/', payload)
-
     window.dispatchEvent(new CustomEvent('carrito-actualizado'))
-
     alert("¡Añadido a la cesta correctamente!")
     router.push('/carrito')
 
@@ -64,12 +62,21 @@ const añadirAlCarrito = async () => {
 </script>
 
 <template>
-<div class="container" v-if="!cargando && producto">
-    <div class="producto-detalle">
-    
-    <div class="galeria-seccion">
-        <img :src="imagenPrincipal" class="main-img" alt="Producto Principal" />
-        <div class="thumbnails">
+  <div class="detalle-fondo">
+    <div class="container" v-if="!cargando && producto">
+      
+      <div class="navegacion-superior">
+        <router-link to="/" class="btn-regresar">
+          <span class="flecha">←</span> Volver al catálogo
+        </router-link>
+      </div>
+
+      <div class="producto-card-premium">
+        <div class="galeria-seccion">
+          <div class="main-img-wrapper">
+            <img :src="imagenPrincipal" class="main-img-detail" alt="Producto Principal" />
+          </div>
+          <div class="thumbnails">
             <img 
               :src="resolverRutaImagen(producto.img)" 
               @click="seleccionarImagen(producto.img)" 
@@ -84,36 +91,53 @@ const añadirAlCarrito = async () => {
               class="thumb" 
               :class="{ activa: imagenPrincipal === resolverRutaImagen(foto.img_url) }"
             />
-        </div>
-    </div>
-
-    <div class="info-seccion">
-        <span class="categoria-tag">{{ producto.categoria_nombre }}</span>
-        <h1>{{ producto.nombre }}</h1>
-        <p class="precio">{{ producto.precio.toFixed(2) }}€</p>
-        <hr />
-        <p class="descripcion">Producto artesanal confeccionado con materiales de alta calidad.</p>
-        
-        <div class="stock-info">
-            <span>Disponibilidad: </span>
-            <strong :class="producto.stock > 0 ? 'in-stock' : 'no-stock'">
-                {{ producto.stock > 0 ? 'En Stock (' + producto.stock + ')' : 'Agotado' }}
-            </strong>
+          </div>
         </div>
 
-        <div class="acciones">
+        <div class="info-seccion">
+          <div class="header-info">
+            <span class="categoria-badge">{{ producto.categoria_nombre }}</span>
+            <h1>{{ producto.nombre }}</h1>
+            <p class="precio-premium">{{ producto.precio.toFixed(2) }}<span>€</span></p>
+          </div>
+          
+          <div class="separador"></div>
+          
+          <div class="cuerpo-info">
+            <p class="descripcion-titulo">Descripción del artesano</p>
+            <p class="descripcion">
+              Cada pieza de "Costuras con Mimo" es única. Este producto ha sido confeccionado a mano 
+              utilizando tejidos seleccionados de alta calidad, cuidando cada puntada para ofrecerte 
+              un acabado impecable y duradero.
+            </p>
+            
+            <div class="meta-info">
+              <div class="stock-wrapper">
+                <div class="punto-estado" :class="producto.stock > 0 ? 'bg-verde' : 'bg-rojo'"></div>
+                <span :class="producto.stock > 0 ? 'texto-verde' : 'texto-rojo'">
+                  {{ producto.stock > 0 ? 'Disponible en taller (' + producto.stock + ' unidades)' : 'Agotado temporalmente' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="acciones-compra">
             <button 
-                class="btn-carrito" 
+                class="btn-comprar" 
                 :disabled="producto.stock <= 0 || añadiendo"
                 @click="añadirAlCarrito"
             >
-                {{ añadiendo ? 'Añadiendo...' : 'Añadir a la cesta' }}
+                <span v-if="!añadiendo">🛒 Añadir a la cesta</span>
+                <span v-else>Procesando...</span>
             </button>
-            <router-link to="/" class="btn-volver">Volver al catálogo</router-link>
+          </div>
         </div>
+      </div>
     </div>
-    </div>
-</div>
-<div v-else-if="cargando" class="loading">Cargando producto...</div>
-</template>
 
+    <div v-else-if="cargando" class="loading-screen">
+      <div class="spinner"></div>
+      <p>Buscando en el taller...</p>
+    </div>
+  </div>
+</template>

@@ -9,8 +9,19 @@ const cargando = ref(false)
 
 const preciosBase = {
   'Mochila Personalizada': 45.0,
-  'Babero Personalizado': 18.0,
-  'Cambiador Personalizado': 28.0
+  'Bolsa de Muda / Merienda': 22.0,
+  'Estuche Enrollable': 18.0,
+  'Babero Personalizado Clásico': 18.0,
+  'Babero Bandana (Pack 2)': 16.0,
+  'Cambiador Personalizado': 28.0,
+  'Neceser Gran Capacidad': 25.0,
+  'Arrullo / Manta Ligera': 38.0,
+  'Funda Cartilla Sanitaria': 26.0,
+  'Chupetero de Tela y Madera': 14.0,
+  'Bolsita Guarda Chupetes': 10.0,
+  'Cesta Organizadora de Tela': 20.0,
+  'Cojín Decorativo Bordado': 24.0,
+  'Guirnalda de Banderines': 22.0
 }
 
 const formulario = ref({

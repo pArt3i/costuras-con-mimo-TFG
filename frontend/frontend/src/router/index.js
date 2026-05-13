@@ -48,7 +48,6 @@ const router = createRouter({
       path: '/:pathMatch(.*)*', 
       name: 'NotFound',
       component: () => import('../views/Errors/NotFoundView.vue'),
-      // Agregamos esto:
       meta: { ocultarNav: true }
     },
     {

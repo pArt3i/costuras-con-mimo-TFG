@@ -95,17 +95,13 @@ const resolverRutaImagen = (ruta) => {
 <template>
   <main class="catalogo-main">
     
-    <!-- CABECERA: Título -->
     <div class="header-catalogo">
       <h1 class="catalogo-titulo">🧵 Catálogo del Taller</h1>
     </div>
 
-    <!-- BARRA DE FILTROS SECUNDARIA (Filtros - Buscador - Orden) -->
     <div class="barra-filtros">
       
-      <!-- IZQUIERDA: Filtros -->
       <div class="grupo-filtros">
-        <!-- Filtro Categoría -->
         <div class="orden-item">
           <label class="label-orden">Categoría:</label>
           <select v-model="categoriaSeleccionada" class="select-filtro select-orden">
@@ -116,7 +112,6 @@ const resolverRutaImagen = (ruta) => {
           </select>
         </div>
 
-        <!-- Filtro Artista -->
         <div class="orden-item">
           <label class="label-orden">Artesano:</label>
           <select v-model="artistaSeleccionado" class="select-filtro select-orden">
@@ -128,7 +123,6 @@ const resolverRutaImagen = (ruta) => {
         </div>
       </div>
 
-      <!-- CENTRO: Buscador -->
       <div class="grupo-buscador">
         <input 
           v-model="busqueda" 
@@ -138,9 +132,7 @@ const resolverRutaImagen = (ruta) => {
         />
       </div>
 
-      <!-- DERECHA: Selectores de Ordenación -->
       <div class="grupo-orden">
-        <!-- Orden por Precio -->
         <div class="orden-item">
           <label class="label-orden">Precio:</label>
           <select v-model="ordenPrecio" class="select-filtro select-orden">
@@ -150,7 +142,6 @@ const resolverRutaImagen = (ruta) => {
           </select>
         </div>
 
-        <!-- Orden por Fecha -->
         <div class="orden-item">
           <label class="label-orden">Fecha:</label>
           <select v-model="ordenFecha" class="select-filtro select-orden">
@@ -162,14 +153,17 @@ const resolverRutaImagen = (ruta) => {
       
     </div>
 
-    <!-- Mensajes de Error y Estado -->
     <div v-if="errorMsg" class="alerta-error">
       {{ errorMsg }}
     </div>
 
-    <!-- Grid de Productos -->
     <div v-if="productosFiltrados.length > 0" class="productos-grid">
-      <div v-for="p in productosFiltrados" :key="p.id" class="producto-card">
+      <router-link 
+        v-for="p in productosFiltrados" 
+        :key="p.id" 
+        :to="'/producto/' + p.id"
+        class="producto-card tarjeta-clicable"
+      >
         <img 
           :src="resolverRutaImagen(p.img)" 
           :alt="p.nombre" 
@@ -180,10 +174,7 @@ const resolverRutaImagen = (ruta) => {
         <p class="producto-categoria" v-if="p.categoria_nombre">{{ p.categoria_nombre }}</p>
         <p class="producto-artista" v-if="p.artista">Artesano: <strong>{{ p.artista }}</strong></p>
         <p class="producto-precio-etiqueta"><strong>{{ p.precio }}€</strong></p>
-        <router-link :to="'/producto/' + p.id" class="btn-ver-detalles">
-          Ver detalles
-        </router-link>
-      </div>
+      </router-link>
     </div>
 
     <div v-else-if="productos.length > 0 && productosFiltrados.length === 0" class="msg-estado">

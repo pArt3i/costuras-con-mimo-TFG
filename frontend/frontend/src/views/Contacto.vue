@@ -41,7 +41,7 @@
           <p>
             <em>
               * Este proyecto web ha sido desarrollado y diseñado con mucho cariño por 
-              <strong>[PON AQUÍ TU NOMBRE]</strong> como Proyecto de Fin de Grado (TFG), 
+              <strong>Pablo Díaz</strong> como Proyecto de Fin de Grado (TFG), 
               fusionando el mundo de la programación con la calidez de la artesanía.
             </em>
           </p>

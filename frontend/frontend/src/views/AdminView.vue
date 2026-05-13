@@ -134,9 +134,21 @@ const guardarCambiosCategoria = async () => {
   }
 }
 
+const eliminarCategoria = async (id) => {
+  if (!confirm("⚠️ ¿Estás segura de que quieres eliminar esta categoría de forma definitiva?")) return;
+  try {
+    await axios.delete(`http://127.0.0.1:8000/api/categorias/${id}/`, getAuthHeaders());
+    alert("Categoría eliminada correctamente.");
+    categoriaEnEdicion.value = null;
+    cargarDatos();
+  } catch (e) {
+    console.error(e);
+    alert("❌ Error al eliminar. Puede que haya productos que estén usando esta categoría.");
+  }
+}
+
 // --- LÓGICA DE PRODUCTOS Y TEJIDOS ---
 const nuevoProducto = () => {
-  // Nota: Inicializamos 'usuario' en vez de 'artista' porque Django espera el ID del usuario
   productoEnEdicion.value = { nombre: '', precio: 0, stock: 0, img: '', id_categoria: '', usuario: '' }
 }
 
@@ -158,6 +170,19 @@ const guardarCambiosProducto = async () => {
   }
 }
 
+const eliminarProducto = async (id) => {
+  if (!confirm("⚠️ ¿Estás segura de que quieres eliminar este producto? Desaparecerá de la tienda.")) return;
+  try {
+    await axios.delete(`http://127.0.0.1:8000/api/productos/${id}/`, getAuthHeaders());
+    alert("Producto eliminado correctamente.");
+    productoEnEdicion.value = null;
+    cargarDatos();
+  } catch (e) {
+    console.error(e);
+    alert("❌ Error al eliminar el producto.");
+  }
+}
+
 const nuevoTejido = () => {
   tejidoEnEdicion.value = { nombre_tej: '', img: '' }
 }
@@ -176,6 +201,19 @@ const guardarCambiosTejido = async () => {
   } catch (e) { 
     console.error(e)
     alert("Error al guardar el tejido.") 
+  }
+}
+
+const eliminarTejido = async (id) => {
+  if (!confirm("⚠️ ¿Estás segura de que quieres eliminar este tejido del catálogo?")) return;
+  try {
+    await axios.delete(`http://127.0.0.1:8000/api/tejidos/${id}/`, getAuthHeaders());
+    alert("Tejido eliminado correctamente.");
+    tejidoEnEdicion.value = null;
+    cargarDatos();
+  } catch (e) {
+    console.error(e);
+    alert("❌ Error al eliminar el tejido.");
   }
 }
 
@@ -204,9 +242,8 @@ onMounted(cargarDatos)
 
       <main v-else class="admin-content dos-columnas">
         
-        <!-- COLUMNA IZQUIERDA (Productos y Tejidos) -->
-        <div class="columna-izquierda">
-          <!-- SECCIÓN 1: PRODUCTOS -->
+        <div class="columna-izquierda" style="display: flex; flex-direction: column; gap: 20px;">
+          
           <section class="panel panel-catalog">
             <div class="panel-header flex-columna">
               <div class="cabecera-principal flex">
@@ -215,19 +252,16 @@ onMounted(cargarDatos)
                   <span class="hint">Haz clic para editar, o crea uno nuevo</span>
                 </div>
                 <div class="botones-accion">
-                  <button @click="nuevaCategoria" class="btn-add btn-secondary">+ Añadir Categoría</button>
                   <button @click="nuevoProducto" class="btn-add">+ Añadir Producto</button>
                 </div>
               </div>
               
-              <!-- ZONA DE FILTROS PRODUCTOS -->
               <div class="filtros-container">
                 <select v-model="filtroCategoriaProducto" class="input-filtro">
                   <option value="">Todas las categorías</option>
                   <option v-for="cat in categorias" :key="cat.id" :value="cat.id">{{ cat.nombre_cat }}</option>
                 </select>
                 
-                <!-- 👇 DESPLEGABLE DE ARTISTA EN LUGAR DE TEXTO 👇 -->
                 <select v-model="filtroArtista" class="input-filtro">
                   <option value="">Todos los artistas</option>
                   <option v-for="admin in administradores" :key="admin.id" :value="admin.username">
@@ -237,7 +271,7 @@ onMounted(cargarDatos)
               </div>
             </div>
 
-            <div class="catalog-list scrollable-list">
+            <div class="catalog-list scrollable-list" style="max-height: 400px; overflow-y: auto;">
               <div v-if="productosProcesados.length === 0" class="no-data">No hay productos que coincidan.</div>
               <div v-for="p in productosProcesados" :key="p.id" class="item-card clickable" @click="productoEnEdicion = {...p}">
                 <img :src="getImg(p.img)">
@@ -251,28 +285,45 @@ onMounted(cargarDatos)
             </div>
           </section>
 
-          <!-- SECCIÓN 2: TEJIDOS -->
-          <section class="panel panel-catalog">
-            <div class="panel-header flex">
-              <div>
-                <h2>🧵 Telas y Estampados</h2>
-                <span class="hint">Materiales disponibles para personalizar</span>
-              </div>
-              <button @click="nuevoTejido" class="btn-add">+ Añadir Tejido</button>
-            </div>
-            <div class="catalog-list scrollable-list">
-              <div v-for="t in tejidos" :key="t.id" class="item-card clickable" @click="tejidoEnEdicion = {...t}">
-                <img :src="getImg(t.img)">
-                <div class="details">
-                  <h3>{{ t.nombre_tej }}</h3>
+          <div style="display: flex; gap: 20px;">
+            
+            <section class="panel panel-catalog" style="flex: 1; margin: 0;">
+              <div class="panel-header flex">
+                <div>
+                  <h2 style="font-size: 1.2rem;">🧵 Telas</h2>
                 </div>
-                <div class="edit-icon">✏️ Editar</div>
+                <button @click="nuevoTejido" class="btn-add" style="padding: 5px 10px; font-size: 0.9rem;">+ Añadir</button>
               </div>
-            </div>
-          </section>
-        </div>
+              <div class="catalog-list scrollable-list" style="max-height: 250px; overflow-y: auto;">
+                <div v-for="t in tejidos" :key="t.id" class="item-card clickable" @click="tejidoEnEdicion = {...t}">
+                  <img :src="getImg(t.img)" style="width: 40px; height: 40px;">
+                  <div class="details">
+                    <h3 style="font-size: 0.9rem; margin: 0;">{{ t.nombre_tej }}</h3>
+                  </div>
+                  <div class="edit-icon">✏️</div>
+                </div>
+              </div>
+            </section>
 
-        <!-- COLUMNA DERECHA (Pedidos) -->
+            <section class="panel panel-catalog" style="flex: 1; margin: 0;">
+              <div class="panel-header flex">
+                <div>
+                  <h2 style="font-size: 1.2rem;">📂 Categorías</h2>
+                </div>
+                <button @click="nuevaCategoria" class="btn-add btn-secondary" style="padding: 5px 10px; font-size: 0.9rem;">+ Añadir</button>
+              </div>
+              <div class="catalog-list scrollable-list" style="max-height: 250px; overflow-y: auto;">
+                <div v-for="c in categorias" :key="c.id" class="item-card clickable" @click="categoriaEnEdicion = {...c}">
+                  <div class="details">
+                    <h3 style="margin: 0; font-size: 0.9rem;">{{ c.nombre_cat }}</h3>
+                  </div>
+                  <div class="edit-icon">✏️</div>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
         <div class="columna-derecha">
           <section class="panel panel-orders panel-completo">
             <div class="panel-header flex-columna">
@@ -283,7 +334,6 @@ onMounted(cargarDatos)
                 </button>
               </div>
 
-              <!-- ZONA DE FILTROS PEDIDOS -->
               <div class="filtros-container">
                 <input type="number" v-model="filtroPedidoId" placeholder="Nº de pedido..." class="input-filtro input-corto">
                 <input type="text" v-model="filtroUsuario" placeholder="Buscar por cliente..." class="input-filtro">
@@ -335,7 +385,6 @@ onMounted(cargarDatos)
         </div>
       </footer>
 
-      <!-- MODAL CATEGORIA -->
       <div v-if="categoriaEnEdicion" class="modal-overlay" @click.self="categoriaEnEdicion = null">
         <div class="modal-card">
           <h3>{{ categoriaEnEdicion.id ? 'Modificar Categoría' : 'Añadir Nueva Categoría' }}</h3>
@@ -345,12 +394,12 @@ onMounted(cargarDatos)
           </div>
           <div class="modal-actions">
             <button @click="guardarCambiosCategoria" class="btn-save">{{ categoriaEnEdicion.id ? 'Guardar Cambios' : 'Añadir Categoría' }}</button>
+            <button v-if="categoriaEnEdicion.id" @click="eliminarCategoria(categoriaEnEdicion.id)" class="btn-cancel" style="background-color: #d9534f; color: white; border: none;">🗑️ Eliminar</button>
             <button @click="categoriaEnEdicion = null" class="btn-cancel">Cancelar</button>
           </div>
         </div>
       </div>
 
-      <!-- MODAL PRODUCTO -->
       <div v-if="productoEnEdicion" class="modal-overlay" @click.self="productoEnEdicion = null">
         <div class="modal-card">
           <h3>{{ productoEnEdicion.id ? 'Modificar Producto' : 'Crear Nuevo Producto' }}</h3>
@@ -359,7 +408,6 @@ onMounted(cargarDatos)
             <input v-model="productoEnEdicion.nombre" type="text" placeholder="Ej. Mochila Guardería" required>
           </div>
           
-          <!-- DESPLEGABLE DE ARTISTA OBLIGATORIO -->
           <div class="input-group">
             <label>Artista (Obligatorio):</label>
             <select v-model="productoEnEdicion.usuario" required>
@@ -399,12 +447,12 @@ onMounted(cargarDatos)
             >
               {{ productoEnEdicion.id ? 'Guardar Cambios' : 'Crear Producto' }}
             </button>
+            <button v-if="productoEnEdicion.id" @click="eliminarProducto(productoEnEdicion.id)" class="btn-cancel" style="background-color: #d9534f; color: white; border: none;">🗑️ Eliminar</button>
             <button @click="productoEnEdicion = null" class="btn-cancel">Cancelar</button>
           </div>
         </div>
       </div>
 
-      <!-- MODAL TEJIDO -->
       <div v-if="tejidoEnEdicion" class="modal-overlay" @click.self="tejidoEnEdicion = null">
         <div class="modal-card">
           <h3>{{ tejidoEnEdicion.id ? 'Modificar Tejido' : 'Añadir Nuevo Tejido' }}</h3>
@@ -421,12 +469,12 @@ onMounted(cargarDatos)
 
           <div class="modal-actions">
             <button @click="guardarCambiosTejido" class="btn-save">{{ tejidoEnEdicion.id ? 'Guardar Cambios' : 'Añadir Tejido' }}</button>
+            <button v-if="tejidoEnEdicion.id" @click="eliminarTejido(tejidoEnEdicion.id)" class="btn-cancel" style="background-color: #d9534f; color: white; border: none;">🗑️ Eliminar</button>
             <button @click="tejidoEnEdicion = null" class="btn-cancel">Cancelar</button>
           </div>
         </div>
       </div>
 
-      <!-- MODAL RECIBO PEDIDO -->
       <div v-if="pedidoSeleccionado" class="modal-overlay" @click.self="pedidoSeleccionado = null">
         <div class="modal-card modal-larga">
           <div class="modal-header">
