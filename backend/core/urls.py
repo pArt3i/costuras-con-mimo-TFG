@@ -5,7 +5,6 @@ from tienda.views import ProductoViewSet, EncargoViewSet, CategoriaViewSet, Teji
 from django.conf import settings             
 from django.conf.urls.static import static   
 
-# 👇 1. IMPORTA LAS VISTAS DE LOS TOKENS
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,

@@ -238,11 +238,11 @@ onMounted(cargarDatos)
         <router-link to="/" class="btn-exit">Volver a la Tienda</router-link>
       </header>
 
-      <div v-if="cargando" class="loader" style="text-align: center; padding: 50px;">Conectando con el taller...</div>
+      <div v-if="cargando" class="loader">Conectando con el taller...</div>
 
       <main v-else class="admin-content dos-columnas">
         
-        <div class="columna-izquierda" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="columna-izquierda">
           
           <section class="panel panel-catalog">
             <div class="panel-header flex-columna">
@@ -271,51 +271,51 @@ onMounted(cargarDatos)
               </div>
             </div>
 
-            <div class="catalog-list scrollable-list" style="max-height: 400px; overflow-y: auto;">
+            <div class="catalog-list scrollable-list">
               <div v-if="productosProcesados.length === 0" class="no-data">No hay productos que coincidan.</div>
               <div v-for="p in productosProcesados" :key="p.id" class="item-card clickable" @click="productoEnEdicion = {...p}">
                 <img :src="getImg(p.img)">
                 <div class="details">
                   <h3>{{ p.nombre }}</h3>
                   <p>Precio: <strong>{{ p.precio }}€</strong> | Stock: <strong>{{ p.stock }}</strong></p>
-                  <p v-if="p.artista" style="font-size: 0.8rem; color: #606c38;">🎨 {{ p.artista }}</p>
+                  <p v-if="p.artista" class="artista-texto">🎨 {{ p.artista }}</p>
                 </div>
                 <div class="edit-icon">✏️ Editar</div>
               </div>
             </div>
           </section>
 
-          <div style="display: flex; gap: 20px;">
+          <div class="paneles-inferiores">
             
-            <section class="panel panel-catalog" style="flex: 1; margin: 0;">
+            <section class="panel panel-catalog panel-mitad">
               <div class="panel-header flex">
                 <div>
-                  <h2 style="font-size: 1.2rem;">🧵 Telas</h2>
+                  <h2 class="titulo-panel-mini">🧵 Telas</h2>
                 </div>
-                <button @click="nuevoTejido" class="btn-add" style="padding: 5px 10px; font-size: 0.9rem;">+ Añadir</button>
+                <button @click="nuevoTejido" class="btn-add btn-sm">+ Añadir</button>
               </div>
-              <div class="catalog-list scrollable-list" style="max-height: 250px; overflow-y: auto;">
+              <div class="catalog-list scrollable-list">
                 <div v-for="t in tejidos" :key="t.id" class="item-card clickable" @click="tejidoEnEdicion = {...t}">
-                  <img :src="getImg(t.img)" style="width: 40px; height: 40px;">
+                  <img :src="getImg(t.img)" class="img-tela-mini">
                   <div class="details">
-                    <h3 style="font-size: 0.9rem; margin: 0;">{{ t.nombre_tej }}</h3>
+                    <h3 class="titulo-mini">{{ t.nombre_tej }}</h3>
                   </div>
                   <div class="edit-icon">✏️</div>
                 </div>
               </div>
             </section>
 
-            <section class="panel panel-catalog" style="flex: 1; margin: 0;">
+            <section class="panel panel-catalog panel-mitad">
               <div class="panel-header flex">
                 <div>
-                  <h2 style="font-size: 1.2rem;">📂 Categorías</h2>
+                  <h2 class="titulo-panel-mini">📂 Categorías</h2>
                 </div>
-                <button @click="nuevaCategoria" class="btn-add btn-secondary" style="padding: 5px 10px; font-size: 0.9rem;">+ Añadir</button>
+                <button @click="nuevaCategoria" class="btn-add btn-secondary btn-sm">+ Añadir</button>
               </div>
-              <div class="catalog-list scrollable-list" style="max-height: 250px; overflow-y: auto;">
+              <div class="catalog-list scrollable-list">
                 <div v-for="c in categorias" :key="c.id" class="item-card clickable" @click="categoriaEnEdicion = {...c}">
                   <div class="details">
-                    <h3 style="margin: 0; font-size: 0.9rem;">{{ c.nombre_cat }}</h3>
+                    <h3 class="titulo-mini">{{ c.nombre_cat }}</h3>
                   </div>
                   <div class="edit-icon">✏️</div>
                 </div>
@@ -394,7 +394,7 @@ onMounted(cargarDatos)
           </div>
           <div class="modal-actions">
             <button @click="guardarCambiosCategoria" class="btn-save">{{ categoriaEnEdicion.id ? 'Guardar Cambios' : 'Añadir Categoría' }}</button>
-            <button v-if="categoriaEnEdicion.id" @click="eliminarCategoria(categoriaEnEdicion.id)" class="btn-cancel" style="background-color: #d9534f; color: white; border: none;">🗑️ Eliminar</button>
+            <button v-if="categoriaEnEdicion.id" @click="eliminarCategoria(categoriaEnEdicion.id)" class="btn-eliminar">🗑️ Eliminar</button>
             <button @click="categoriaEnEdicion = null" class="btn-cancel">Cancelar</button>
           </div>
         </div>
@@ -447,7 +447,7 @@ onMounted(cargarDatos)
             >
               {{ productoEnEdicion.id ? 'Guardar Cambios' : 'Crear Producto' }}
             </button>
-            <button v-if="productoEnEdicion.id" @click="eliminarProducto(productoEnEdicion.id)" class="btn-cancel" style="background-color: #d9534f; color: white; border: none;">🗑️ Eliminar</button>
+            <button v-if="productoEnEdicion.id" @click="eliminarProducto(productoEnEdicion.id)" class="btn-eliminar">🗑️ Eliminar</button>
             <button @click="productoEnEdicion = null" class="btn-cancel">Cancelar</button>
           </div>
         </div>
@@ -469,7 +469,7 @@ onMounted(cargarDatos)
 
           <div class="modal-actions">
             <button @click="guardarCambiosTejido" class="btn-save">{{ tejidoEnEdicion.id ? 'Guardar Cambios' : 'Añadir Tejido' }}</button>
-            <button v-if="tejidoEnEdicion.id" @click="eliminarTejido(tejidoEnEdicion.id)" class="btn-cancel" style="background-color: #d9534f; color: white; border: none;">🗑️ Eliminar</button>
+            <button v-if="tejidoEnEdicion.id" @click="eliminarTejido(tejidoEnEdicion.id)" class="btn-eliminar">🗑️ Eliminar</button>
             <button @click="tejidoEnEdicion = null" class="btn-cancel">Cancelar</button>
           </div>
         </div>

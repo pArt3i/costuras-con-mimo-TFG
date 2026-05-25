@@ -426,6 +426,13 @@ select:focus {
     font-size: 0.9rem;
 }
 
+.input-group input,
+.input-group select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
 /* ==========================================================================
     TIENDA / CATÁLOGO
    ========================================================================== */
@@ -2433,4 +2440,96 @@ select:focus {
 .tarjeta-clicable:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+/* ==========================================================================
+   FIX RESPONSIVE Y ESTILOS EXTRAÍDOS DE ADMINVIEW
+   ========================================================================== */
+
+/* Contenedor principal de la columna izquierda limpia */
+.columna-izquierda {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Spinner de carga */
+.loader {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2rem;
+    color: var(--primario);
+}
+
+/* Contenedor inferior de Telas y Categorías */
+.paneles-inferiores {
+    display: flex;
+    gap: 20px;
+    flex: 1; /* Esto es CLAVE para que se divida el alto disponible con la tabla de productos */
+    min-height: 0; /* Necesario para que el scroll interno del flexbox funcione en portátiles */
+}
+
+/* Paneles dentro de la fila inferior */
+.panel-mitad {
+    margin: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Textos y títulos ajustados */
+.artista-texto {
+    font-size: 0.8rem;
+    color: #606c38;
+    margin: 0;
+    margin-top: 5px;
+}
+
+.titulo-panel-mini {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.titulo-mini {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Imágenes y Botones pequeños */
+.img-tela-mini {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+
+.btn-eliminar {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+    flex: 1; /* Para que ocupe el mismo ancho que el botón de Guardar */
+}
+
+.btn-eliminar:hover {
+    background-color: #c9302c;
+}
+
+/* Ajuste responsivo extra para portátiles de pantallas pequeñas (ej: 1366x768) */
+@media (max-height: 800px) {
+    .columna-izquierda, .columna-derecha {
+        height: calc(100vh - 160px);
+    }
 }

@@ -97,12 +97,9 @@ class PedidoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Si es admin ve todos los pedidos, si es cliente solo ve los suyos
         if self.request.user.is_staff:
             return Pedido.objects.all().order_by('-fecha_pedido')
         return Pedido.objects.filter(id_usuario=self.request.user).order_by('-fecha_pedido')
-
-    # ---> NUEVA LÓGICA DE CORREOS <---
     
     def perform_update(self, serializer):
         estado_anterior = serializer.instance.estado

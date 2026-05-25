@@ -5,8 +5,6 @@ const currentYear = new Date().getFullYear()
 <template>
   <footer class="footer-container">
     <div class="footer-content">
-      
-      <!-- SECCIÓN IZQUIERDA: Descripción -->
       <div class="footer-info">
         <h3 class="footer-brand">🧶 Costuras con Mimo</h3>
         <p class="footer-desc">
@@ -14,8 +12,6 @@ const currentYear = new Date().getFullYear()
           con mucho amor, cuidando cada detalle para ti.
         </p>
       </div>
-
-      <!-- SECCIÓN DERECHA: Redes Sociales -->
       <div class="footer-social">
         <h4>¡Síguenos en redes!</h4>
         <div class="social-icons">
@@ -29,10 +25,7 @@ const currentYear = new Date().getFullYear()
           </a>
         </div>
       </div>
-      
     </div>
-
-    <!-- SECCIÓN INFERIOR: Copyright -->
     <div class="footer-bottom">
       <p>&copy; {{ currentYear }} Costuras con Mimo. Todos los derechos reservados.</p>
     </div>

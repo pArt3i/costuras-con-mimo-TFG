@@ -68,7 +68,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'costuras_db',
         'USER': 'postgres',
-        'PASSWORD': 'pArt3i', # Introduce tu clave de Postgres
+        'PASSWORD': 'pArt3i',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -152,7 +152,6 @@ load_dotenv()
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 
 
-# settings.py
 ANYMAIL = {
     "MAILTRAP_API_TOKEN": os.getenv("MAILTRAP_API_TOKEN"),
 }

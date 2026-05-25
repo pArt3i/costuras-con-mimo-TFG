@@ -87,13 +87,16 @@ onMounted(cargarCarrito)
 
 <template>
   <div class="container">
-    <h1 class="titulo">Tu Cesta de Compra</h1>
+    <h1 class="titulo" v-if="items.length > 0 || cargando">Tu Cesta de Compra</h1>
 
-    <div v-if="cargando" class="msg">Cargando tu pedido...</div>
+    <div v-if="cargando" class="msg" style="text-align: center; padding: 40px; color: #606c38;">
+      Cargando tu pedido...
+    </div>
     
     <div v-else-if="items.length === 0" class="carrito-vacio">
-      <p>No tienes nada en la cesta todavía.</p>
-      <router-link to="/" class="btn-comprar">Ir al catálogo</router-link>
+      <h2 style="color: #283618; margin-bottom: 20px;">Tu Cesta de Compra</h2>
+      <p style="margin-bottom: 30px; font-size: 1.1rem;">No tienes nada en la cesta todavía.</p>
+      <router-link to="/" class="btn-primario" style="text-decoration: none;">Ir al catálogo</router-link>
     </div>
 
     <div v-else class="carrito-layout">
@@ -134,7 +137,7 @@ onMounted(cargarCarrito)
           <span>{{ total.toFixed(2) }}€</span>
         </div>
         
-        <button @click="irAPagar" class="btn-pagar" :disabled="pagando">
+        <button @click="irAPagar" class="btn-primario" style="width: 100%; margin-top: 15px;" :disabled="pagando">
           {{ pagando ? 'Conectando...' : 'Pagar Pedido' }}
         </button>
       </div>
